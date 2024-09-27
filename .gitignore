@@ -14,6 +14,8 @@ dist-ssr
 .vscode
 python
 
+src-tauri/binaries
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
