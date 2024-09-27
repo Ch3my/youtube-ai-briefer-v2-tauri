@@ -1,113 +1,60 @@
-use futures_util::{SinkExt, StreamExt};
-use tauri::{api::process::Command, Builder};
-use std::process::{Command as StdCommand};
+// Avoid terminal on exe on production
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use tokio::{net::TcpStream, sync::Mutex};
-use tokio_tungstenite::{connect_async, tungstenite::Message, MaybeTlsStream, WebSocketStream};
+use tokio::sync::Mutex;
+use tauri::{
+    api::process::{Command, CommandChild},
+    Builder, Manager,
+};
 
 struct AppState {
-    ws: Option<WebSocketStream<MaybeTlsStream<TcpStream>>>,
+    ai_brain: Option<CommandChild>,
 }
 
-impl AppState {
-    async fn new() -> Self {
-        // let ai_brain_process = Command::new(
-        //     "C:\\Github\\youtube-ai-briefer-v2\\youtube-ia-briefer-tauri\\ai-brain.exe",
-        // )
-        // .spawn()
-        // .expect("Failed to start ai_brain.exe");
-
-        // Need to have the correct name according to: https://tauri.app/v1/guides/building/sidecar/
-        // sidecar kills on process on exit I need to kill the other
-        let (mut rx, mut child) = Command::new_sidecar("ai-brain")
+impl Default for AppState {
+    fn default() -> Self {
+        let (_rx, child) = Command::new_sidecar("ai-brain")
             .expect("failed to create `my-sidecar` binary command")
             .spawn()
             .expect("Failed to spawn sidecar");
 
-        // You can modify the URL as per your requirements.
-        let url = "ws://localhost:12345"; // Example WebSocket URL
-
-        // Create a default WebSocket connection (asynchronous operation)
-        let (ws, _) = connect_async(url)
-            .await
-            .expect("Failed to connect to WebSocket");
-
-        // Print a success message when the connection is established
-        println!("Successfully connected to WebSocket at {}", url);
-
         AppState {
-            ws: Some(ws),
-        }
-    }
-    async fn close_ws(&mut self) {
-        if let Some(mut ws) = self.ws.take() {
-            // Close the WebSocket gracefully
-            let _ = ws.close(None).await;
-            println!("WebSocket connection closed.");
-        }
-    }
-
-    fn kill_ai_brain(&mut self) {
-        #[cfg(target_os = "windows")]
-        {
-            let output = StdCommand::new("taskkill")
-                .arg("/F")
-                .arg("/IM")
-                .arg("ai-brain.exe")
-                .output()
-                .expect("Failed to execute taskkill command");
-
-            // Log output
-            let stdout = String::from_utf8_lossy(&output.stdout);
-            let stderr = String::from_utf8_lossy(&output.stderr);
-            println!("Output: {}", stdout);
-            if !stderr.is_empty() {
-                println!("Error: {}", stderr);
-            }
+            ai_brain: Some(child),
         }
     }
 }
 
-#[tauri::command]
-async fn send(state: tauri::State<'_, Mutex<AppState>>, message: String) -> Result<(), String> {
-    let mut state = state.lock().await;
-
-    if let Some(ws) = &mut state.ws {
-        // Attempt to send the message
-        ws.send(Message::Text(message))
-            .await
-            .map_err(|e| format!("Failed to send message: {}", e))?;
-
-        // No need to wait for a response
-        Ok(())
-    } else {
-        Err("WebSocket connection is not established".into())
+impl AppState {
+    pub fn cleanup(&mut self) {
+        // TODO. Manage other SO this is for Windows
+        // Kill process and related Processes
+        if let Some(child) = self.ai_brain.take() {
+            let _ = Command::new("taskkill")
+                .args(&["/F", "/T", "/PID", &child.pid().to_string()])
+                .output();
+        }
     }
 }
 
-#[tauri::command]
-async fn on_exit(state: tauri::State<'_, Mutex<AppState>>) -> Result<String, String> {
-    let mut state = state.lock().await;
-    state.kill_ai_brain();
-    state.close_ws().await;
-    std::process::exit(0);
-}
-
-#[tokio::main]
-async fn main() {
-    // Create the AppState asynchronously
-    let app_state = Mutex::new(AppState::new().await);
-
+fn main() {
     Builder::default()
-        .manage(app_state)
-        // .on_window_event(|event| {
-        //     match event.event() {
-        //         tauri::WindowEvent::CloseRequested { api, .. } => {
-        //         }
-        //         _ => {}
-        //     }
-        // })
-        .invoke_handler(tauri::generate_handler![send, on_exit])
+        .manage(Mutex::new(AppState::default()))
+        .on_window_event(|event| {
+            match event.event() {
+                tauri::WindowEvent::CloseRequested { .. } => {
+                    if event.window().label() != "main" {
+                        // Not main window, maybe splashScreen
+                        return;
+                    }
+                    let state: tauri::State<'_, Mutex<AppState>> = event.window().state();
+                    let rt = tokio::runtime::Runtime::new().unwrap();
+                    let mut sst = rt.block_on(state.lock());
+                    sst.cleanup();
+                }
+                _ => {}
+            }
+        })
+        .invoke_handler(tauri::generate_handler![])
         .run(tauri::generate_context!())
         .unwrap();
 }

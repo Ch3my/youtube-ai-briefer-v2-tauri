@@ -101,8 +101,7 @@ async function close() {
       <h2 class="text-white mb-4">Received Messages:</h2>
       <ul>
         <li v-for="(message, index) in messages" :key="index" class="text-white mb-2">
-          <strong>{{ new Date(message.timestamp).toLocaleString() }}</strong>: 
-          {{ message.type }} - {{ message.content }}
+          {{ JSON.stringify(message) }}
         </li>
       </ul>
     </div>

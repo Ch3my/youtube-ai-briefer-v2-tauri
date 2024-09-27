@@ -11,7 +11,7 @@ edition = "2021"
 tauri-build = { version = "1", features = [] }
 
 [dependencies]
-tauri = { version = "1.4.0", features = [ "shell-sidecar", "shell-open", "process-command-api"] }
+tauri = { version = "1.4.0", features = [ "shell-open", "shell-sidecar", "process-command-api"] }
 serde = { version = "1", features = ["derive"] }
 tokio = { version = "1.0", features = ["full"] }
 tokio-tungstenite = "0.17"
