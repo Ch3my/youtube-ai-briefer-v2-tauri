@@ -19,15 +19,15 @@
         "open": true,
         "sidecar": true,
         "scope": [
-          { "name": "binaries/ai-brain", "sidecar": true }
+          { "name": "ai-brain", "sidecar": true }
         ]
       }
     },
     "windows": [
       {
         "title": "youtube-ia-briefer-tauri",
-        "width": 800,
-        "height": 600
+        "width": 1200,
+        "height": 700
       }
     ],
     "security": {
@@ -38,8 +38,9 @@
       "targets": "all",
       "identifier": "com.youtube-ia-briefer-tauri.app",
       "externalBin": [
-        "binaries/ai-brain"
+        "ai-brain"
       ],
+      "resources": ["_internal"],
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
