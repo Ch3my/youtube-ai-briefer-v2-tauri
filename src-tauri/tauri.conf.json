@@ -25,7 +25,8 @@
     },
     "windows": [
       {
-        "title": "youtube-ia-briefer-tauri",
+        "title": "Youtube AI Briefer v2",
+        "center": true,
         "width": 1200,
         "height": 700
       }
