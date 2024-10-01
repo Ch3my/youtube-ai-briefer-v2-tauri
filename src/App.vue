@@ -4,86 +4,26 @@ import BackendFeedback from "./components/BackendFeedback.vue";
 import VideoInfo from "./components/VideoInfo.vue";
 // import { invoke } from "@tauri-apps/api/tauri";
 import VueMarkdown from 'vue-markdown-render'
+
+import { useWebSocket } from './composables/useWebSocket';
+const { isConnected, sendMessage, onMessage } = useWebSocket('ws://localhost:12345');
+
+import RagChat from './components/RagChat.vue';
+
 // @ts-ignore
 import { getYoutubeMediaInfo } from "./youtube-helper"
 
-const socket = ref<WebSocket | null>(null);
 const videoUrl = ref('');
 const mainContent = ref('');
 const videoTitle = ref('');
 const videoImg = ref('');
-const videoDescription = ref('');
-const isConnected = ref(false);
 const processBtnDisabled = ref(false);
-const queryRagBtnDisabled = ref(false);
 const feedbackType = ref('')
 const feedbackText = ref('')
-const ragQuestion = ref('')
-const ragContext = ref('')
-const ragChat = ref<RagChatItem[]>([]);
 
 const whisperConfirmed = ref(false)
 
-type Context = {
-  source: string;
-  content: string;
-};
-
-type RagChatItem = {
-  answer: string;
-  context?: Context[];
-  src: string
-};
-const chatBox = ref<HTMLElement | null>(null);
-watch(ragChat, async () => {
-  // Es necesario esperar nextTick para que el contenido ya este dentro del div
-  // y podamos hacer scroll correctamente
-  await nextTick();
-  if (chatBox.value != null) {
-    chatBox.value.scrollTop = chatBox.value.scrollHeight;
-  }
-}, { deep: true });
-
-const connectWebSocket = () => {
-  console.log('Attempting to connect to WebSocket...');
-  socket.value = new WebSocket('ws://localhost:12345');
-
-  socket.value.onopen = () => {
-    isConnected.value = true;
-  };
-
-  socket.value.onmessage = (event) => {
-    try {
-      const jsonMessage = JSON.parse(event.data);
-      processBackendMessage(jsonMessage)
-    } catch (error) {
-      console.error('Error parsing incoming message:', error);
-    }
-  };
-
-  socket.value.onerror = (error) => {
-    console.error('WebSocket error:', error);
-  };
-
-  socket.value.onclose = (event) => {
-    console.log('WebSocket connection closed', event.reason);
-    isConnected.value = false;
-    // Attempt to reconnect after x seconds
-    setTimeout(connectWebSocket, 3000);
-  };
-};
-
-function sendMessage(msg: any): void {
-  if (socket.value && socket.value.readyState === WebSocket.OPEN) {
-    socket.value.send(JSON.stringify(msg));
-  } else {
-    console.error('WebSocket is not connected. Current state:', socket.value?.readyState);
-    if (!isConnected.value) {
-      console.log('Attempting to reconnect...');
-      connectWebSocket();
-    }
-  }
-};
+const chatComponent = ref<InstanceType<typeof RagChat> | null>(null);
 
 function buildVideoData() {
   feedbackType.value = "info"
@@ -98,16 +38,11 @@ function buildVideoData() {
   })
 }
 
-onMounted(() => {
-  connectWebSocket();
-});
+// onMounted(() => {
+// });
 
-onUnmounted(() => {
-  if (socket.value) {
-    console.log('Closing WebSocket connection');
-    socket.value.close();
-  }
-});
+// onUnmounted(() => {
+// });
 
 async function fetchMetaYT(url: string = "https://www.youtube.com/watch?v=dQw4w9WgXcQ") {
   let result = await getYoutubeMediaInfo(url)
@@ -116,11 +51,10 @@ async function fetchMetaYT(url: string = "https://www.youtube.com/watch?v=dQw4w9
     return
   }
   videoTitle.value = result.title
-  videoDescription.value = result.description.slice(0, 100)
   videoImg.value = result.thumbnailUrl
 }
 
-function processBackendMessage(jsonMessage: any) {
+function handleBackendMessage(jsonMessage: any) {
   if (jsonMessage.action == "notasDetalladas") {
     feedbackType.value = "success"
     feedbackText.value = "Procesamiento completado"
@@ -128,12 +62,7 @@ function processBackendMessage(jsonMessage: any) {
     processBtnDisabled.value = false
   }
   if (jsonMessage.action == "ragAnswer") {
-    queryRagBtnDisabled.value = false
-    ragChat.value.push({
-      answer: jsonMessage.answer,
-      context: jsonMessage.context,
-      src: "NIA"
-    })
+    chatComponent.value?.handleBackendMessage(jsonMessage);
   }
   if (jsonMessage.action == "message" && jsonMessage.msgCode == "info") {
     feedbackType.value = "info"
@@ -144,42 +73,12 @@ function processBackendMessage(jsonMessage: any) {
     feedbackText.value = jsonMessage.msg
   }
 }
-
-function ragQuery() {
-  queryRagBtnDisabled.value = true
-  sendMessage({
-    query: ragQuestion.value,
-    action: "query"
-  })
-  ragChat.value.push({
-    answer: ragQuestion.value,
-    src: "USER"
-  })
-  ragQuestion.value = ""
-}
-
-function showContext() {
-  // Filtramos el ultimo mensaje de NIA 
-  const lastNiaAnswer = ragChat.value
-    .filter(item => item.src === "NIA")  // Filter items where src is "NIA"
-    .pop();  // Get the last matching item
-
-  if (!lastNiaAnswer) {
-    return
-  }
-  if (!lastNiaAnswer.context) {
-    return
-  }
-  ragContext.value = ""
-  for (const a of lastNiaAnswer.context) {
-    ragContext.value += `Source: ${a.source}\n`
-    ragContext.value += `${a.content}\n\n`
-  }
-}
+// Set up the message handler
+onMessage(handleBackendMessage)
 </script>
 
 <template>
-  <div class="grid h-screen p-4 gap-4" style="grid-template-columns: 1fr 4fr 2fr;">
+  <div class="grid h-screen p-4 gap-4 grid-rows-1" style="grid-template-columns: 1fr 4fr 2fr;">
     <!-- First column -->
     <div class="flex gap-2 flex-col justify-between">
       <div class="flex justify-between">
@@ -204,7 +103,7 @@ function showContext() {
           </svg>
         </button>
       </div>
-      <VideoInfo :video-title="videoTitle" :video-description="videoDescription" :video-img="videoImg" />
+      <VideoInfo :video-title="videoTitle" :video-img="videoImg" />
       <div class="flex flex-col gap-2">
         <BackendFeedback :type="feedbackType" :txt="feedbackText" />
         <input v-model="videoUrl" type="text"
@@ -224,24 +123,6 @@ function showContext() {
     </div>
 
     <!-- Third column -->
-    <div class="flex flex-col gap-2">
-      <div ref="chatBox" class="h-full w-full p-2.5 bg-slate-700 border border-gray-600 rounded overflow-y-auto">
-        <div v-for="(message, index) in ragChat" :key="index" :class="{
-          'user-message text-right': message.src === 'USER',
-          'nia-message text-left': message.src === 'NIA'
-        }">
-          <p :class="message.src === 'USER' ? 'bg-blue-500' : 'bg-green-900'" class="inline-block p-2 rounded-lg mb-4">
-            {{ message.answer }}
-          </p>
-        </div>
-      </div>
-      <input type="text" v-model="ragQuestion"
-        class="border rounded block p-2.5 bg-slate-700 border-gray-600 placeholder-gray-400 ">
-      <div class="flex justify-between gap-2">
-        <button class="bg-slate-700 p-2.5 rounded hover:bg-slate-600" @click="showContext">R</button>
-        <button class="bg-slate-700 p-2.5 rounded enabled:hover:bg-slate-600 flex-1 disabled:opacity-50"
-          @click="ragQuery" :disabled="queryRagBtnDisabled">Enviar</button>
-      </div>
-    </div>
+    <RagChat ref="chatComponent" :is-connected="isConnected" @send-message="sendMessage" />
   </div>
 </template>

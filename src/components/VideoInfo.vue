@@ -1,8 +1,8 @@
 <template>
     <div class="break-words flex flex-col gap-2">
-        <h1 class="text-lg">{{ videoTitle }}</h1>
+        <!-- <h1 class="text-lg">{{ videoTitle }}</h1> -->
         <img :src="videoImg" :alt="videoTitle" />
-        <p class=" ">{{ videoDescription }}</p>
+        <p class="text-lg ">{{ videoTitle }}</p>
     </div>
 </template>
 
@@ -22,7 +22,7 @@ export default defineComponent({
         },
         videoDescription: {
             type: String as PropType<string>,
-            required: true,
+            required: false,
         },
     },
     setup(props) {
