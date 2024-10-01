@@ -43,11 +43,11 @@ impl AppState {
     pub fn cleanup(&mut self) {
         // TODO. Manage other SO this is for Windows
         // Kill process and related Processes
-        // if let Some(child) = self.ai_brain.take() {
-        //     let _ = Command::new("taskkill")
-        //         .args(&["/F", "/T", "/PID", &child.pid().to_string()])
-        //         .output();
-        // }
+        if let Some(child) = self.ai_brain.take() {
+            let _ = Command::new("taskkill")
+                .args(&["/F", "/T", "/PID", &child.pid().to_string()])
+                .output();
+        }
         // Kill all instances of ai-brain.exe
         let _ = Command::new("taskkill")
             .args(&["/F", "/IM", "ai-brain.exe", "/T"])

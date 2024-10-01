@@ -2,7 +2,7 @@
     <div class="break-words flex flex-col gap-2">
         <!-- <h1 class="text-lg">{{ videoTitle }}</h1> -->
         <img :src="videoImg" :alt="videoTitle" />
-        <p class="text-lg ">{{ videoTitle }}</p>
+        <p class="text-lg leading-5">{{ videoTitle }}</p>
     </div>
 </template>
 

@@ -1,5 +1,5 @@
 <template>
-    <div :class="alertClass" role="alert" v-show="type" class="flex gap-2">
+    <div :class="alertClass" role="alert" v-show="type" class="flex gap-2 text-sm">
       <svg
         class="flex-shrink-0 inline w-4 h-4"
         aria-hidden="true"

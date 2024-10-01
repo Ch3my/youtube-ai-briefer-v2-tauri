@@ -28,8 +28,8 @@ const closeModal = () => {
 </script>
 
 <template>
-  <dialog ref="modalRef" @close="closeModal" class="p-0 bg-slate-800 text-white rounded-lg shadow-xl">
-    <div class="flex flex-col w-full max-w-md">
+  <dialog ref="modalRef" @close="closeModal" class="p-0 bg-slate-800 text-slate-200 rounded max-w-[50vw]">
+    <div class="flex flex-col w-full">
       <div class="flex justify-between items-center p-4 border-b border-slate-600">
         <h3 class="text-lg font-semibold">{{ title }}</h3>
         <button @click="closeModal" class="text-slate-400 hover:text-white">
@@ -38,15 +38,8 @@ const closeModal = () => {
           </svg>
         </button>
       </div>
-      <div class="p-4">
+      <div class="p-4 max-h-[80vh] overflow-y-auto">
         <slot></slot>
-      </div>
-      <div class="flex justify-end p-4 border-t border-slate-600">
-        <slot name="footer">
-          <button @click="closeModal" class="px-4 py-2 bg-slate-700 text-white rounded hover:bg-slate-600">
-            Close
-          </button>
-        </slot>
       </div>
     </div>
   </dialog>
@@ -55,5 +48,6 @@ const closeModal = () => {
 <style scoped>
 dialog::backdrop {
   background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px)
 }
 </style>
