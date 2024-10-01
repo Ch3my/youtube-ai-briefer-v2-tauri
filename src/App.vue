@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import BackendFeedback from "./components/BackendFeedback.vue";
+import BackendStatus from "./components/BackendStatus.vue";
+import SettingsBtn from "./components/SettingsBtn.vue";
 import VideoInfo from "./components/VideoInfo.vue";
 // import { invoke } from "@tauri-apps/api/tauri";
 import VueMarkdown from 'vue-markdown-render'
@@ -82,16 +84,8 @@ onMessage(handleBackendMessage)
     <!-- First column -->
     <div class="flex gap-2 flex-col justify-between">
       <div class="flex justify-between">
-        <span v-if="isConnected"
-          class="inline-flex items-center bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full dark:bg-green-900 dark:text-green-300">
-          <span class="w-2 h-2 me-1 bg-green-500 rounded-full"></span>
-          Backend Connected
-        </span>
-        <span v-else
-          class="inline-flex items-center bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full dark:bg-red-900 dark:text-red-300">
-          <span class="w-2 h-2 me-1 bg-red-500 rounded-full"></span> Backend Disconnected
-        </span>
-        <button type="button"
+        <BackendStatus :is-connected="isConnected" />
+        <!-- <button type="button"
           class="flex items-center text-white  focus:outline-none focus:ring-4  font-medium rounded-lg text-sm px-3 py-1.5 bg-slate-700 hover:bg-slate-600 focus:ring-gray-700 border-gray-700">
           <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-settings" width="24" height="24"
             viewBox="0 0 24 24" stroke-width="1.5" stroke="white" fill="none" stroke-linecap="round"
@@ -101,7 +95,8 @@ onMessage(handleBackendMessage)
               d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" />
             <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
           </svg>
-        </button>
+        </button> -->
+        <SettingsBtn />
       </div>
       <VideoInfo :video-title="videoTitle" :video-img="videoImg" />
       <div class="flex flex-col gap-2">
