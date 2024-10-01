@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import BackendFeedback from "./components/BackendFeedback.vue";
 import VideoInfo from "./components/VideoInfo.vue";
 // import { invoke } from "@tauri-apps/api/tauri";
@@ -14,12 +14,35 @@ const videoTitle = ref('');
 const videoImg = ref('');
 const videoDescription = ref('');
 const isConnected = ref(false);
+const processBtnDisabled = ref(false);
+const queryRagBtnDisabled = ref(false);
 const feedbackType = ref('')
 const feedbackText = ref('')
 const ragQuestion = ref('')
-const ragAnswers = ref([])
+const ragContext = ref('')
+const ragChat = ref<RagChatItem[]>([]);
 
 const whisperConfirmed = ref(false)
+
+type Context = {
+  source: string;
+  content: string;
+};
+
+type RagChatItem = {
+  answer: string;
+  context?: Context[];
+  src: string
+};
+const chatBox = ref<HTMLElement | null>(null);
+watch(ragChat, async () => {
+  // Es necesario esperar nextTick para que el contenido ya este dentro del div
+  // y podamos hacer scroll correctamente
+  await nextTick();
+  if (chatBox.value != null) {
+    chatBox.value.scrollTop = chatBox.value.scrollHeight;
+  }
+}, { deep: true });
 
 const connectWebSocket = () => {
   console.log('Attempting to connect to WebSocket...');
@@ -63,9 +86,10 @@ function sendMessage(msg: any): void {
 };
 
 function buildVideoData() {
+  feedbackType.value = "info"
+  feedbackText.value = "Procesamiento iniciado"
+  processBtnDisabled.value = true
   mainContent.value = ""
-  feedbackText.value = ""
-  feedbackType.value = ""
   fetchMetaYT(videoUrl.value)
   sendMessage({
     whisperConfirmed: whisperConfirmed.value,
@@ -101,10 +125,15 @@ function processBackendMessage(jsonMessage: any) {
     feedbackType.value = "success"
     feedbackText.value = "Procesamiento completado"
     mainContent.value = jsonMessage.notasDetalladas
+    processBtnDisabled.value = false
   }
   if (jsonMessage.action == "ragAnswer") {
-    feedbackType.value = "success"
-    feedbackText.value = jsonMessage.msg
+    queryRagBtnDisabled.value = false
+    ragChat.value.push({
+      answer: jsonMessage.answer,
+      context: jsonMessage.context,
+      src: "NIA"
+    })
   }
   if (jsonMessage.action == "message" && jsonMessage.msgCode == "info") {
     feedbackType.value = "info"
@@ -115,12 +144,44 @@ function processBackendMessage(jsonMessage: any) {
     feedbackText.value = jsonMessage.msg
   }
 }
+
+function ragQuery() {
+  queryRagBtnDisabled.value = true
+  sendMessage({
+    query: ragQuestion.value,
+    action: "query"
+  })
+  ragChat.value.push({
+    answer: ragQuestion.value,
+    src: "USER"
+  })
+  ragQuestion.value = ""
+}
+
+function showContext() {
+  // Filtramos el ultimo mensaje de NIA 
+  const lastNiaAnswer = ragChat.value
+    .filter(item => item.src === "NIA")  // Filter items where src is "NIA"
+    .pop();  // Get the last matching item
+
+  if (!lastNiaAnswer) {
+    return
+  }
+  if (!lastNiaAnswer.context) {
+    return
+  }
+  ragContext.value = ""
+  for (const a of lastNiaAnswer.context) {
+    ragContext.value += `Source: ${a.source}\n`
+    ragContext.value += `${a.content}\n\n`
+  }
+}
 </script>
 
 <template>
-  <div class="flex h-screen ">
+  <div class="grid h-screen p-4 gap-4" style="grid-template-columns: 1fr 4fr 2fr;">
     <!-- First column -->
-    <div class="p-4 flex gap-2 flex-col justify-between flex-[0.5]">
+    <div class="flex gap-2 flex-col justify-between">
       <div class="flex justify-between">
         <span v-if="isConnected"
           class="inline-flex items-center bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full dark:bg-green-900 dark:text-green-300">
@@ -149,32 +210,38 @@ function processBackendMessage(jsonMessage: any) {
         <input v-model="videoUrl" type="text"
           class="border rounded block p-2.5 bg-slate-700 border-gray-600 placeholder-gray-400 text-white"
           placeholder="Youtube URL" />
-          <div class="flex gap-2">
-            <button class="bg-slate-700 text-white p-2.5 rounded hover:bg-slate-600 flex-1"
-              @click="buildVideoData">Procesar</button>
-              <button type="button" class="bg-slate-700 text-white p-2.5 rounded hover:bg-slate-600">P</button>
-          </div>
+        <div class="flex gap-2">
+          <button class="bg-slate-700 text-white p-2.5 rounded enabled:hover:bg-slate-600 flex-1 disabled:opacity-50"
+            @click="buildVideoData" :disabled="processBtnDisabled || !isConnected">Procesar</button>
+          <button type="button" class="bg-slate-700 text-white p-2.5 rounded hover:bg-slate-600">P</button>
+        </div>
       </div>
     </div>
 
     <!-- Second column (largest) -->
-    <div class="w-6/12 p-4 overflow-y-auto prose prose-invert">
-      <!-- TODO MarkDown Procesor -->
-      <vue-markdown :source="mainContent" />
+    <div class="overflow-y-auto prose prose-invert prose-h1:mb-4 prose-h2:mt-3 prose-h2:mb-2 max-w-none">
+      <vue-markdown :source="mainContent" class="mr-4" />
     </div>
 
     <!-- Third column -->
-    <div class="flex-[0.5] p-4 flex flex-col gap-2">
-      <textarea
-        class="border rounded block p-2.5 bg-slate-700 border-gray-600 placeholder-gray-400 text-white h-full w-full"></textarea>
-      <input type="text"
-        class="border rounded block p-2.5 bg-slate-700 border-gray-600 placeholder-gray-400 text-white">
+    <div class="flex flex-col gap-2">
+      <div ref="chatBox" class="h-full w-full p-2.5 bg-slate-700 border border-gray-600 rounded overflow-y-auto">
+        <div v-for="(message, index) in ragChat" :key="index" :class="{
+          'user-message text-right': message.src === 'USER',
+          'nia-message text-left': message.src === 'NIA'
+        }">
+          <p :class="message.src === 'USER' ? 'bg-blue-500' : 'bg-green-900'" class="inline-block p-2 rounded-lg mb-4">
+            {{ message.answer }}
+          </p>
+        </div>
+      </div>
+      <input type="text" v-model="ragQuestion"
+        class="border rounded block p-2.5 bg-slate-700 border-gray-600 placeholder-gray-400 ">
       <div class="flex justify-between gap-2">
-        <button class="bg-slate-700 text-white p-2.5 rounded hover:bg-slate-600">R</button>
-        <button class="bg-slate-700 text-white p-2.5 rounded hover:bg-slate-600 flex-1">Enviar</button>
+        <button class="bg-slate-700 p-2.5 rounded hover:bg-slate-600" @click="showContext">R</button>
+        <button class="bg-slate-700 p-2.5 rounded enabled:hover:bg-slate-600 flex-1 disabled:opacity-50"
+          @click="ragQuery" :disabled="queryRagBtnDisabled">Enviar</button>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped></style>
