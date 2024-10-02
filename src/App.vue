@@ -29,7 +29,11 @@ const chatComponent = ref<InstanceType<typeof RagChat> | null>(null);
 const handleClipboardContent = (content: string) => {
   videoUrl.value = content;
 };
-
+function handleKeyUp(event: KeyboardEvent) {
+  if (event.key === 'Enter') {
+    buildVideoData();
+  }
+}
 function buildVideoData() {
   if (videoUrl.value == "") {
     feedbackType.value = "alert"
@@ -98,7 +102,7 @@ onMessage(handleBackendMessage)
       <VideoInfo :video-title="videoTitle" :video-img="videoImg" />
       <div class="flex flex-col gap-2">
         <BackendFeedback :type="feedbackType" :txt="feedbackText" />
-        <input v-model="videoUrl" type="text"
+        <input v-model="videoUrl" type="text" @keyup="handleKeyUp"
           class="border rounded block p-2.5 bg-slate-700 border-gray-600 placeholder-gray-400 "
           placeholder="Youtube URL" />
         <div class="flex gap-2">
@@ -110,7 +114,8 @@ onMessage(handleBackendMessage)
     </div>
 
     <!-- Second column (largest) -->
-    <div class="overflow-y-auto prose prose-invert prose-h1:mb-4 prose-h2:mt-3 prose-h2:mb-2 prose-h3:mt-3 prose-h3:mb-2 max-w-none">
+    <div
+      class="overflow-y-auto prose prose-invert prose-h1:mb-4 prose-h2:mt-3 prose-h2:mb-2 prose-h3:mt-3 prose-h3:mb-2 max-w-none">
       <vue-markdown :source="mainContent" class="mr-4" />
     </div>
 

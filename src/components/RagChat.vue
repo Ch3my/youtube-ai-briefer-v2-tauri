@@ -19,6 +19,11 @@ const props = defineProps<{
 
 const emit = defineEmits(['sendMessage']);
 
+function handleKeyUp(event: KeyboardEvent) {
+  if (event.key === 'Enter') {
+    ragQuery();
+  }
+}
 const ragQuestion = ref('');
 const ragContext = ref('');
 const ragChat = ref<RagChatItem[]>([]);
@@ -90,7 +95,7 @@ defineExpose({ handleBackendMessage });
         </p>
       </div>
     </div>
-    <input type="text" v-model="ragQuestion"
+    <input type="text" v-model="ragQuestion" @keyup="handleKeyUp"
       class="border rounded block p-2.5 bg-slate-700 border-gray-600 placeholder-gray-400 ">
     <div class="flex justify-between gap-2">
       <button class="bg-slate-700 p-2.5 rounded hover:bg-slate-600" @click="showContext">
