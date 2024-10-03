@@ -10,7 +10,7 @@ export function useWebSocket(url: string) {
 
     socket.value.onopen = () => {
       isConnected.value = true;
-      console.log('WebSocket connected');
+      console.log(new Date(), 'WebSocket connected');
     };
 
     socket.value.onmessage = (event) => {
@@ -29,7 +29,7 @@ export function useWebSocket(url: string) {
     };
 
     socket.value.onclose = (event) => {
-      console.log('WebSocket connection closed', event.reason);
+      console.log(new Date(), 'WebSocket connection closed', event.reason);
       isConnected.value = false;
       // Attempt to reconnect after 3 seconds
       setTimeout(connectWebSocket, 3000);

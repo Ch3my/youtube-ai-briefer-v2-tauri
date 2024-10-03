@@ -7,6 +7,7 @@ import VideoInfo from "./components/VideoInfo.vue";
 import RagChat from './components/RagChat.vue';
 import VueMarkdown from 'vue-markdown-render'
 import ClipboardBtn from "./components/ClipboardBtn.vue";
+import CopyButtons from "./components/CopyBtns.vue";
 // import { invoke } from "@tauri-apps/api/tauri";
 
 // @ts-ignore
@@ -23,7 +24,8 @@ const processBtnDisabled = ref(false);
 const feedbackType = ref('')
 const feedbackText = ref('')
 const whisperConfirmed = ref(false)
-
+const originalNotes = ref<string[]>([])
+const originalTranscript = ref('')
 const chatComponent = ref<InstanceType<typeof RagChat> | null>(null);
 
 const handleClipboardContent = (content: string) => {
@@ -34,6 +36,12 @@ function handleKeyUp(event: KeyboardEvent) {
     buildVideoData();
   }
 }
+
+function handleCopied(msg: string) {
+  feedbackType.value = "info"
+  feedbackText.value = msg
+}
+
 function buildVideoData() {
   if (videoUrl.value == "") {
     feedbackType.value = "alert"
@@ -86,6 +94,12 @@ function handleBackendMessage(jsonMessage: any) {
     feedbackType.value = "info"
     feedbackText.value = jsonMessage.msg
   }
+  if (jsonMessage.action == "noteSection") {
+    originalNotes.value.push(jsonMessage.note)
+  }
+  if (jsonMessage.action == "transcript") {
+    originalTranscript.value = jsonMessage.transcript
+  }
 }
 // Set up the message handler
 onMessage(handleBackendMessage)
@@ -95,9 +109,13 @@ onMessage(handleBackendMessage)
   <div class="grid h-screen p-4 gap-4 grid-rows-1" style="grid-template-columns: 1fr 4fr 2fr;">
     <!-- First column -->
     <div class="flex gap-2 flex-col justify-between">
-      <div class="flex justify-between">
-        <BackendStatus :is-connected="isConnected" />
-        <SettingsBtn />
+      <div class="flex gap-4 flex-col">
+        <div class="flex justify-between">
+          <BackendStatus :is-connected="isConnected" />
+          <SettingsBtn />
+        </div>
+        <CopyButtons :original-transcript="originalTranscript" :original-notes="originalNotes"
+          :main-content="mainContent" @copied="handleCopied" />
       </div>
       <VideoInfo :video-title="videoTitle" :video-img="videoImg" />
       <div class="flex flex-col gap-2">
