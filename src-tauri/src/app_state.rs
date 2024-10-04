@@ -1,4 +1,6 @@
 use tauri::api::process::{Command, CommandChild, CommandEvent};
+use std::fs::OpenOptions;
+use std::io::Write; 
 
 pub struct AppState {
     pub ai_brain: Option<CommandChild>,
@@ -11,15 +13,28 @@ impl Default for AppState {
             .spawn()
             .expect("Failed to spawn sidecar");
 
+        // Open the log file for appending
+        let mut log_file = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open("log.txt")
+            .expect("Unable to open log file");
+
         // To show SideCar logs in same window as Tauri
         tauri::async_runtime::spawn(async move {
             while let Some(event) = rx.recv().await {
                 match event {
                     CommandEvent::Stdout(line) => {
                         println!("AI Brain stdout: {}", line);
+                        if let Err(e) = writeln!(log_file, "AI Brain stdout: {}", line) {
+                            eprintln!("Failed to write to log file: {}", e);
+                        }
                     }
                     CommandEvent::Stderr(line) => {
                         eprintln!("AI Brain stderr: {}", line);
+                        if let Err(e) = writeln!(log_file, "AI Brain stderr: {}", line) {
+                            eprintln!("Failed to write to log file: {}", e);
+                        }
                     }
                     _ => {}
                 }
