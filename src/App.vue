@@ -8,8 +8,7 @@ import RagChat from './components/RagChat.vue';
 import VueMarkdown from 'vue-markdown-render'
 import ClipboardBtn from "./components/ClipboardBtn.vue";
 import CopyButtons from "./components/CopyBtns.vue";
-// import { invoke } from "@tauri-apps/api/tauri";
-
+import Modal from './components/Modal.vue';
 // @ts-ignore
 import { getYoutubeMediaInfo } from "./youtube-helper"
 
@@ -21,6 +20,7 @@ const mainContent = ref('');
 const videoTitle = ref('');
 const videoImg = ref('');
 const processBtnDisabled = ref(false);
+const whisperModal = ref(false);
 const feedbackType = ref('')
 const feedbackText = ref('')
 const whisperConfirmed = ref(false)
@@ -82,6 +82,7 @@ function handleBackendMessage(jsonMessage: any) {
     feedbackText.value = "Procesamiento completado"
     mainContent.value = jsonMessage.notasDetalladas
     processBtnDisabled.value = false
+    whisperConfirmed.value = false
   }
   if (jsonMessage.action == "ragAnswer") {
     chatComponent.value?.handleBackendMessage(jsonMessage);
@@ -139,5 +140,15 @@ onMessage(handleBackendMessage)
 
     <!-- Third column -->
     <RagChat ref="chatComponent" :is-connected="isConnected" @send-message="sendMessage" />
+    <Modal :modelValue="whisperModal" title="Usar Whisper?">
+      <p>{{ feedbackText }}</p>
+      <p>¿Utilizar Whisper para obtener el transcript?</p>
+      <div class="flex flex-end gap-4">
+        <button class="bg-slate-700 p-2.5 rounded enabled:hover:bg-slate-600 flex-1 disabled:opacity-50"
+          @click="() => whisperConfirmed == true">Si</button>
+        <button class="bg-slate-700 p-2.5 rounded enabled:hover:bg-slate-600 flex-1 disabled:opacity-50"
+          @click="() => whisperModal == !whisperModal">No</button>
+      </div>
+    </Modal>
   </div>
 </template>

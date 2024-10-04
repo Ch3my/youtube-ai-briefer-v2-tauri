@@ -1,12 +1,38 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
 import Modal from './Modal.vue';
+import { invoke } from "@tauri-apps/api/tauri";
 
 const isModalOpen = ref(false);
 
 const openModal = () => {
   isModalOpen.value = true;
 };
+
+const availableModels = ref(["claude-3-haiku-20240307", "claude-3-5-sonnet-20240620", "gpt-4o-mini", "gpt-4o"]);
+
+const ragSearchTypes = ref(['similarity', 'mmr']);
+
+const config = reactive({
+  resumeModel: 'gpt-4o-mini',
+  resumeChunkSize: 10000,
+  condensaModel: 'gpt-4o-mini',
+  ragModel: 'gpt-4o-mini',
+  ragSearchType: 'similarity',
+  ragSearchK: 5,
+  ragChunkSize: 1000,
+  useWhisper: 'no',
+});
+
+async function saveConfig() {
+  await invoke("write_config", { jsonData: JSON.stringify(config) });
+}
+
+onMounted(async () => {
+  const configFile = await invoke("read_config");
+  Object.assign(config, configFile);
+});
+
 </script>
 
 <template>
@@ -14,7 +40,8 @@ const openModal = () => {
     <button @click="openModal" type="button"
       class="flex items-center focus:outline-none font-medium rounded text-sm px-3 py-1.5 bg-slate-700 hover:bg-slate-600 focus:ring-gray-700 border-gray-700">
       <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-settings" width="24" height="24"
-        viewBox="0 0 24 24" stroke-width="1.5" stroke="white" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        viewBox="0 0 24 24" stroke-width="1.5" stroke="white" fill="none" stroke-linecap="round"
+        stroke-linejoin="round">
         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
         <path
           d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" />
@@ -22,19 +49,41 @@ const openModal = () => {
       </svg>
     </button>
 
-    <Modal v-model="isModalOpen" title="Settings">
-      <div class="">
-        <!-- Add your settings content here -->
-        <p>Here you can add various settings for your application.</p>
-        <!-- For example: -->
-        <div class="mt-4">
-          <label class="block mb-2">Theme:</label>
-          <select class="w-full p-2 bg-slate-700 rounded">
-            <option>Light</option>
-            <option>Dark</option>
-          </select>
-        </div>
+    <Modal v-model="isModalOpen" title="Config">
+      <div class="w-[40vw] grid grid-cols-2 gap-4 grid-rows-8 items-center">
+        <label for="resumeModel" class="">Resume Model:</label>
+        <select v-model="config.resumeModel" id="resumeModel" class="p-2 border rounded text-slate-800">
+          <option v-for="model in availableModels" :key="model" :value="model">{{ model }}</option>
+        </select>
+        <label for="resumeChunkSize" class="mb-1">Resume Chunk Size:</label>
+        <input v-model.number="config.resumeChunkSize" id="resumeChunkSize" type="number"
+          class="p-2 border rounded text-slate-800" />
+        <label for="condensaModel" class="mb-1">Condensa Model:</label>
+        <select v-model="config.condensaModel" id="condensaModel" class="p-2 border rounded text-slate-800">
+          <option v-for="model in availableModels" :key="model" :value="model">{{ model }}</option>
+        </select>
+        <label for="ragModel" class="mb-1">RAG Model:</label>
+        <select v-model="config.ragModel" id="ragModel" class="p-2 border rounded text-slate-800">
+          <option v-for="model in availableModels" :key="model" :value="model">{{ model }}</option>
+        </select>
+        <label for="ragSearchType" class="mb-1">RAG Search Type:</label>
+        <select v-model="config.ragSearchType" id="ragSearchType" class="p-2 border rounded text-slate-800">
+          <option v-for="type in ragSearchTypes" :key="type" :value="type">{{ type }}</option>
+        </select>
+        <label for="ragSearchK" class="mb-1">RAG Search K:</label>
+        <input v-model.number="config.ragSearchK" id="ragSearchK" type="number"
+          class="p-2 border rounded text-slate-800" />
+        <label for="ragChunkSize" class="mb-1">RAG Chunk Size:</label>
+        <input v-model.number="config.ragChunkSize" id="ragChunkSize" type="number"
+          class="p-2 border rounded text-slate-800" />
+        <label for="useWhisper" class="mb-1">Use Whisper:</label>
+        <select v-model="config.useWhisper" id="useWhisper" class="p-2 border rounded text-slate-800">
+          <option value="si">Sí</option>
+          <option value="no">No</option>
+        </select>
       </div>
+      <button class="bg-slate-700 p-2.5 rounded enabled:hover:bg-slate-600 flex-1 disabled:opacity-50"
+        @click="saveConfig">Guardar</button>
     </Modal>
   </div>
 </template>

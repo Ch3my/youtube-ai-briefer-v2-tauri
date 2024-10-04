@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, nextTick } from 'vue';
 import Modal from './Modal.vue';
+import VueMarkdown from 'vue-markdown-render'
 
 type Context = {
   source: string;
@@ -87,12 +88,12 @@ defineExpose({ handleBackendMessage });
   <div class="flex flex-col gap-2">
     <div ref="chatBox" class="h-full w-full p-2.5 bg-slate-700 border border-gray-600 rounded overflow-y-auto">
       <div v-for="(message, index) in ragChat" :key="index" :class="{
-        'user-message text-right': message.src === 'USER',
-        'nia-message text-left': message.src === 'NIA'
+        'user-message text-right ml-8': message.src === 'USER',
+        'nia-message text-left mr-8': message.src === 'NIA'
       }">
-        <p :class="message.src === 'USER' ? 'bg-blue-500' : 'bg-green-900'" class="inline-block p-2 rounded-lg mb-4">
-          {{ message.answer }}
-        </p>
+        <div :class="message.src === 'USER' ? 'bg-blue-500' : 'bg-green-900 prose prose-invert prose-p:mt-0'" class="inline-block p-2 rounded-lg mb-4">
+          <vue-markdown :source="message.answer" />
+        </div>
       </div>
     </div>
     <input type="text" v-model="ragQuestion" @keyup="handleKeyUp"

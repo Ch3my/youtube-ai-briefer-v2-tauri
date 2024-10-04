@@ -3,7 +3,7 @@
 
 mod commands;
 mod app_state;
-use commands::{get_env, write_config, cleanup};
+use commands::{get_env, write_config, cleanup, read_config};
 use app_state::AppState;
 
 use tokio::sync::Mutex;
@@ -28,7 +28,7 @@ fn main() {
                 _ => {}
             }
         })
-        .invoke_handler(tauri::generate_handler![get_env, write_config])
+        .invoke_handler(tauri::generate_handler![get_env, write_config, read_config])
         .run(tauri::generate_context!())
         .unwrap();
 }

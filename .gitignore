@@ -16,6 +16,7 @@ python
 
 src-tauri/binaries
 src-tauri/_internal
+config.json
 *.exe
 
 # Editor directories and files
