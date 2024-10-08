@@ -18,6 +18,7 @@ src-tauri/binaries
 src-tauri/_internal
 config.json
 *.exe
+log.txt
 
 # Editor directories and files
 .vscode/*

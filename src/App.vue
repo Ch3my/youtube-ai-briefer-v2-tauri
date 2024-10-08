@@ -48,6 +48,7 @@ function buildVideoData() {
     feedbackText.value = "Debes ingresar una Url"
     return
   }
+  originalNotes.value = []
   feedbackType.value = "info"
   feedbackText.value = "Procesamiento iniciado"
   processBtnDisabled.value = true
@@ -134,7 +135,7 @@ onMessage(handleBackendMessage)
 
     <!-- Second column (largest) -->
     <div
-      class="overflow-y-auto prose prose-invert prose-h1:mb-4 prose-h2:mt-3 prose-h2:mb-2 prose-h3:mt-3 prose-h3:mb-2 max-w-none">
+      class="overflow-y-auto prose prose-slate prose-invert prose-h1:mb-4 prose-h2:mt-3 prose-h2:mb-2 prose-h3:mt-3 prose-h3:mb-2 max-w-none">
       <vue-markdown :source="mainContent" class="mr-4" />
     </div>
 
