@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, reactive } from 'vue';
 import BackendFeedback from "./components/BackendFeedback.vue";
 import BackendStatus from "./components/BackendStatus.vue";
 import SettingsBtn from "./components/SettingsBtn.vue";
@@ -9,6 +9,7 @@ import VueMarkdown from 'vue-markdown-render'
 import ClipboardBtn from "./components/ClipboardBtn.vue";
 import CopyButtons from "./components/CopyBtns.vue";
 import Modal from './components/Modal.vue';
+import { invoke } from "@tauri-apps/api/tauri";
 // @ts-ignore
 import { getYoutubeMediaInfo } from "./youtube-helper"
 
@@ -27,9 +28,20 @@ const whisperConfirmed = ref(false)
 const originalNotes = ref<string[]>([])
 const originalTranscript = ref('')
 const chatComponent = ref<InstanceType<typeof RagChat> | null>(null);
+const currentConfig = reactive({
+  resumeModel: 'gpt-4o-mini',
+  resumeChunkSize: 10000,
+  condensaModel: 'gpt-4o-mini',
+  ragModel: 'gpt-4o-mini',
+  ragSearchType: 'similarity',
+  ragSearchK: 5,
+  ragChunkSize: 1000,
+  useWhisper: 'no',
+});
 
 const handleClipboardContent = (content: string) => {
   videoUrl.value = content;
+  fetchMetaYT(videoUrl.value)
 };
 function handleKeyUp(event: KeyboardEvent) {
   if (event.key === 'Enter') {
@@ -43,6 +55,7 @@ function handleCopied(msg: string) {
 }
 
 function buildVideoData() {
+  whisperModal.value = false
   if (videoUrl.value == "") {
     feedbackType.value = "alert"
     feedbackText.value = "Debes ingresar una Url"
@@ -61,8 +74,10 @@ function buildVideoData() {
   })
 }
 
-// onMounted(() => {
-// });
+onMounted(async () => {
+  const configFile = await invoke("read_config");
+  Object.assign(currentConfig, configFile);
+});
 
 // onUnmounted(() => {
 // });
@@ -95,6 +110,9 @@ function handleBackendMessage(jsonMessage: any) {
   if (jsonMessage.action == "message" && jsonMessage.msgCode == "useWhisper") {
     feedbackType.value = "info"
     feedbackText.value = jsonMessage.msg
+    if (currentConfig.useWhisper == "si") {
+      whisperModal.value = true
+    }
   }
   if (jsonMessage.action == "noteSection") {
     originalNotes.value.push(jsonMessage.note)
@@ -105,6 +123,17 @@ function handleBackendMessage(jsonMessage: any) {
 }
 // Set up the message handler
 onMessage(handleBackendMessage)
+
+function acceptWhisper() {
+  whisperConfirmed.value = true
+  whisperModal.value = false
+  buildVideoData()
+}
+function closeWhisperModal() {
+  whisperModal.value = false
+  processBtnDisabled.value = false
+}
+
 </script>
 
 <template>
@@ -141,14 +170,14 @@ onMessage(handleBackendMessage)
 
     <!-- Third column -->
     <RagChat ref="chatComponent" :is-connected="isConnected" @send-message="sendMessage" />
-    <Modal :modelValue="whisperModal" title="Usar Whisper?">
+    <Modal v-model="whisperModal" title="Usar Whisper?">
       <p>{{ feedbackText }}</p>
-      <p>¿Utilizar Whisper para obtener el transcript?</p>
+      <p class="mb-4">¿Utilizar Whisper para obtener el transcript?</p>
       <div class="flex flex-end gap-4">
         <button class="bg-slate-700 p-2.5 rounded enabled:hover:bg-slate-600 flex-1 disabled:opacity-50"
-          @click="() => whisperConfirmed == true">Si</button>
+          @click="acceptWhisper">Si</button>
         <button class="bg-slate-700 p-2.5 rounded enabled:hover:bg-slate-600 flex-1 disabled:opacity-50"
-          @click="() => whisperModal == !whisperModal">No</button>
+          @click="closeWhisperModal">No</button>
       </div>
     </Modal>
   </div>
