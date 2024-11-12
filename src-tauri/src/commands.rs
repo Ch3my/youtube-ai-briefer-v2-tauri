@@ -1,9 +1,6 @@
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 use std::path::Path;
-use tauri::State;
-use tokio::sync::Mutex;
-use crate::app_state::AppState;
 use serde_json::{json, Value};
 
 #[tauri::command]
@@ -79,10 +76,4 @@ pub fn read_config() -> Result<Value, String> {
 #[tauri::command]
 pub fn get_env(name: &str) -> String {
     std::env::var(String::from(name)).unwrap_or_else(|_| String::from(""))
-}
-
-pub fn cleanup(state: &State<'_, Mutex<AppState>>) {
-    let rt = tokio::runtime::Runtime::new().unwrap();
-    let mut sst = rt.block_on(state.lock());
-    sst.cleanup();
 }

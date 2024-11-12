@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 
 async function getYoutubeMediaInfo(url: string) {
     const mediaId = extractVideoId(url)

@@ -9,7 +9,7 @@ import VueMarkdown from 'vue-markdown-render'
 import ClipboardBtn from "./components/ClipboardBtn.vue";
 import CopyButtons from "./components/CopyBtns.vue";
 import Modal from './components/Modal.vue';
-import { invoke } from "@tauri-apps/api/tauri";
+import { invoke } from "@tauri-apps/api/core";
 // @ts-ignore
 import { getYoutubeMediaInfo } from "./youtube-helper"
 
