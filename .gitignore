@@ -16,6 +16,8 @@ python
 
 src-tauri/binaries
 src-tauri/_internal
+src-tauri/condensa_prompt.txt
+src-tauri/resume_prompt.txt
 config.json
 *.exe
 log.txt
