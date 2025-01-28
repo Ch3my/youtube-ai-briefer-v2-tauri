@@ -28,7 +28,7 @@ const closeModal = () => {
 </script>
 
 <template>
-    <dialog ref="modalRef" @close="closeModal" class="p-0 bg-slate-800 text-slate-200 rounded max-w-[50vw]">
+    <dialog ref="modalRef" @close="closeModal" class="p-0 bg-slate-800 text-slate-200 rounded-sm max-w-[50vw]">
       <div class="flex flex-col w-full">
         <div class="flex justify-between items-center p-4 border-b border-slate-600">
           <h3 class="text-lg font-semibold">{{ title }}</h3>

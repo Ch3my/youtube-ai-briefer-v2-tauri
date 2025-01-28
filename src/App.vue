@@ -152,10 +152,10 @@ function closeWhisperModal() {
       <div class="flex flex-col gap-2">
         <BackendFeedback :type="feedbackType" :txt="feedbackText" />
         <input v-model="videoUrl" type="text" @keyup="handleKeyUp"
-          class="border rounded block p-2.5 bg-slate-700 border-gray-600 placeholder-gray-400 "
+          class="border rounded-sm block p-2.5 bg-slate-700 border-gray-600 placeholder-gray-400 "
           placeholder="Youtube URL" />
         <div class="flex gap-2">
-          <button class="bg-slate-700  p-2.5 rounded enabled:hover:bg-slate-600 flex-1 disabled:opacity-50"
+          <button class="bg-slate-700  p-2.5 rounded-sm enabled:hover:bg-slate-600 flex-1 disabled:opacity-50"
             @click="buildVideoData" :disabled="processBtnDisabled || !isConnected">Procesar</button>
           <ClipboardBtn @clipboard-content="handleClipboardContent" />
         </div>
@@ -174,9 +174,9 @@ function closeWhisperModal() {
       <p>{{ feedbackText }}</p>
       <p class="mb-4">¿Utilizar Whisper para obtener el transcript?</p>
       <div class="flex flex-end gap-4">
-        <button class="bg-slate-700 p-2.5 rounded enabled:hover:bg-slate-600 flex-1 disabled:opacity-50"
+        <button class="bg-slate-700 p-2.5 rounded-sm enabled:hover:bg-slate-600 flex-1 disabled:opacity-50"
           @click="acceptWhisper">Si</button>
-        <button class="bg-slate-700 p-2.5 rounded enabled:hover:bg-slate-600 flex-1 disabled:opacity-50"
+        <button class="bg-slate-700 p-2.5 rounded-sm enabled:hover:bg-slate-600 flex-1 disabled:opacity-50"
           @click="closeWhisperModal">No</button>
       </div>
     </Modal>

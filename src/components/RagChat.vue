@@ -86,7 +86,7 @@ defineExpose({ handleBackendMessage });
 
 <template>
   <div class="flex flex-col gap-2">
-    <div ref="chatBox" class="h-full w-full p-2.5 bg-slate-700 border border-gray-600 rounded overflow-y-auto">
+    <div ref="chatBox" class="h-full w-full p-2.5 bg-slate-700 border border-gray-600 rounded-sm overflow-y-auto">
       <div v-for="(message, index) in ragChat" :key="index" :class="{
         'user-message text-right ml-8': message.src === 'USER',
         'nia-message text-left mr-8': message.src === 'NIA'
@@ -97,9 +97,9 @@ defineExpose({ handleBackendMessage });
       </div>
     </div>
     <input type="text" v-model="ragQuestion" @keyup="handleKeyUp"
-      class="border rounded block p-2.5 bg-slate-700 border-gray-600 placeholder-gray-400 ">
+      class="border rounded-sm block p-2.5 bg-slate-700 border-gray-600 placeholder-gray-400 ">
     <div class="flex justify-between gap-2">
-      <button class="bg-slate-700 p-2.5 rounded hover:bg-slate-600" @click="showContext">
+      <button class="bg-slate-700 p-2.5 rounded-sm hover:bg-slate-600" @click="showContext">
         <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-vocabulary" width="22" height="22"
           viewBox="0 0 24 24" stroke-width="1.5" stroke="white" fill="none" stroke-linecap="round"
           stroke-linejoin="round">
@@ -114,7 +114,7 @@ defineExpose({ handleBackendMessage });
           <path d="M16 15h1" />
         </svg>
       </button>
-      <button class="bg-slate-700 p-2.5 rounded enabled:hover:bg-slate-600 flex-1 disabled:opacity-50" @click="ragQuery"
+      <button class="bg-slate-700 p-2.5 rounded-sm enabled:hover:bg-slate-600 flex-1 disabled:opacity-50" @click="ragQuery"
         :disabled="queryRagBtnDisabled || !props.isConnected">Enviar</button>
     </div>
     <Modal v-model="isModalOpen" title="Contexto">

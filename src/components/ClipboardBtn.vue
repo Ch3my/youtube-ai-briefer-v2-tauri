@@ -18,7 +18,7 @@ const handleClick = async () => {
 
 <template>
   <button type="button"
-    class="bg-slate-700 text-white p-2.5 rounded hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-500"
+    class="bg-slate-700 text-white p-2.5 rounded-sm hover:bg-slate-600 focus:outline-hidden focus:ring-2 focus:ring-slate-500"
     @click="handleClick" title="Paste from clipboard">
     <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clipboard" width="24" height="24"
       viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round"

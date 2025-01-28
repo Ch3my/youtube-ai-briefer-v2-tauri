@@ -31,7 +31,7 @@ const handleCopy = async (content: string, type: string) => {
 <template>
     <div class="flex gap-4">
         <button type="button" @click="handleCopy(originalTranscript, 'transcript')" title="Copiar Transcript Original"
-            class="flex items-center focus:outline-none font-medium rounded text-sm px-3 py-1.5 bg-slate-700 hover:bg-slate-600 focus:ring-gray-700 border-gray-700">
+            class="flex items-center focus:outline-hidden font-medium rounded-sm text-sm px-3 py-1.5 bg-slate-700 hover:bg-slate-600 focus:ring-gray-700 border-gray-700">
             <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-record-mail" width="44"
                 height="44" viewBox="0 0 24 24" stroke-width="1.5" stroke="white" fill="none" stroke-linecap="round"
                 stroke-linejoin="round">
@@ -43,7 +43,7 @@ const handleCopy = async (content: string, type: string) => {
         </button>
         <button type="button" @click="handleCopy(originalNotes.join('\n\n'), 'notes')"
             title="Copiar Notas de cada seccion"
-            class="flex items-center  focus:outline-none font-medium rounded text-sm px-3 py-1.5 bg-slate-700 hover:bg-slate-600 focus:ring-gray-700 border-gray-700">
+            class="flex items-center  focus:outline-hidden font-medium rounded-sm text-sm px-3 py-1.5 bg-slate-700 hover:bg-slate-600 focus:ring-gray-700 border-gray-700">
             <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-notes" width="44" height="44"
                 viewBox="0 0 24 24" stroke-width="1.5" stroke="white" fill="none" stroke-linecap="round"
                 stroke-linejoin="round">
@@ -55,7 +55,7 @@ const handleCopy = async (content: string, type: string) => {
             </svg>
         </button>
         <button type="button" @click="handleCopy(mainContent, 'markdown')" title="Copiar Markdown de documento final"
-            class="flex items-center focus:outline-none font-medium rounded text-sm px-3 py-1.5 bg-slate-700 hover:bg-slate-600 focus:ring-gray-700 border-gray-700">
+            class="flex items-center focus:outline-hidden font-medium rounded-sm text-sm px-3 py-1.5 bg-slate-700 hover:bg-slate-600 focus:ring-gray-700 border-gray-700">
             <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-markdown" width="44" height="44"
                 viewBox="0 0 24 24" stroke-width="1.5" stroke="white" fill="none" stroke-linecap="round"
                 stroke-linejoin="round">

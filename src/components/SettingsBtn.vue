@@ -38,7 +38,7 @@ onMounted(async () => {
 <template>
   <div>
     <button @click="openModal" type="button"
-      class="flex items-center focus:outline-none font-medium rounded text-sm px-3 py-1.5 bg-slate-700 hover:bg-slate-600 focus:ring-gray-700 border-gray-700">
+      class="flex items-center focus:outline-hidden font-medium rounded-sm text-sm px-3 py-1.5 bg-slate-700 hover:bg-slate-600 focus:ring-gray-700 border-gray-700">
       <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-settings" width="24" height="24"
         viewBox="0 0 24 24" stroke-width="1.5" stroke="white" fill="none" stroke-linecap="round"
         stroke-linejoin="round">
@@ -52,37 +52,37 @@ onMounted(async () => {
     <Modal v-model="isModalOpen" title="Config">
       <div class="w-[40vw] grid grid-cols-2 gap-4 grid-rows-8 items-center">
         <label for="resumeModel" class="">Resume Model:</label>
-        <select v-model="config.resumeModel" id="resumeModel" class="p-2 border rounded text-slate-800">
+        <select v-model="config.resumeModel" id="resumeModel" class="p-2 border rounded-sm text-slate-800">
           <option v-for="model in availableModels" :key="model" :value="model">{{ model }}</option>
         </select>
         <label for="resumeChunkSize" class="mb-1">Resume Chunk Size:</label>
         <input v-model.number="config.resumeChunkSize" id="resumeChunkSize" type="number"
-          class="p-2 border rounded text-slate-800" />
+          class="p-2 border rounded-sm text-slate-800" />
         <label for="condensaModel" class="mb-1">Condensa Model:</label>
-        <select v-model="config.condensaModel" id="condensaModel" class="p-2 border rounded text-slate-800">
+        <select v-model="config.condensaModel" id="condensaModel" class="p-2 border rounded-sm text-slate-800">
           <option v-for="model in availableModels" :key="model" :value="model">{{ model }}</option>
         </select>
         <label for="ragModel" class="mb-1">RAG Model:</label>
-        <select v-model="config.ragModel" id="ragModel" class="p-2 border rounded text-slate-800">
+        <select v-model="config.ragModel" id="ragModel" class="p-2 border rounded-sm text-slate-800">
           <option v-for="model in availableModels" :key="model" :value="model">{{ model }}</option>
         </select>
         <label for="ragSearchType" class="mb-1">RAG Search Type:</label>
-        <select v-model="config.ragSearchType" id="ragSearchType" class="p-2 border rounded text-slate-800">
+        <select v-model="config.ragSearchType" id="ragSearchType" class="p-2 border rounded-sm text-slate-800">
           <option v-for="type in ragSearchTypes" :key="type" :value="type">{{ type }}</option>
         </select>
         <label for="ragSearchK" class="mb-1">RAG Search K:</label>
         <input v-model.number="config.ragSearchK" id="ragSearchK" type="number"
-          class="p-2 border rounded text-slate-800" />
+          class="p-2 border rounded-sm text-slate-800" />
         <label for="ragChunkSize" class="mb-1">RAG Chunk Size:</label>
         <input v-model.number="config.ragChunkSize" id="ragChunkSize" type="number"
-          class="p-2 border rounded text-slate-800" />
+          class="p-2 border rounded-sm text-slate-800" />
         <label for="useWhisper" class="mb-1">Use Whisper:</label>
-        <select v-model="config.useWhisper" id="useWhisper" class="p-2 border rounded text-slate-800">
+        <select v-model="config.useWhisper" id="useWhisper" class="p-2 border rounded-sm text-slate-800">
           <option value="si">Sí</option>
           <option value="no">No</option>
         </select>
       </div>
-      <button class="bg-slate-700 p-2.5 rounded enabled:hover:bg-slate-600 flex-1 disabled:opacity-50"
+      <button class="bg-slate-700 p-2.5 rounded-sm enabled:hover:bg-slate-600 flex-1 disabled:opacity-50"
         @click="saveConfig">Guardar</button>
     </Modal>
   </div>
