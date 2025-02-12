@@ -27,6 +27,8 @@ const feedbackText = ref('')
 const whisperConfirmed = ref(false)
 const originalNotes = ref<string[]>([])
 const originalTranscript = ref('')
+const finalDocument = ref('')
+const currentContent = ref('resumen')
 const chatComponent = ref<InstanceType<typeof RagChat> | null>(null);
 const currentConfig = reactive({
   resumeModel: 'gpt-4o-mini',
@@ -97,6 +99,7 @@ function handleBackendMessage(jsonMessage: any) {
     feedbackType.value = "success"
     feedbackText.value = "Procesamiento completado"
     mainContent.value = jsonMessage.notasDetalladas
+    finalDocument.value = jsonMessage.notasDetalladas
     processBtnDisabled.value = false
     whisperConfirmed.value = false
   }
@@ -134,6 +137,16 @@ function closeWhisperModal() {
   processBtnDisabled.value = false
 }
 
+function toggleMainContent() {
+  if (currentContent.value === "resumen") {
+    mainContent.value = originalNotes.value.join("")
+    currentContent.value = "notas";
+  } else if (currentContent.value === "notas") {
+    mainContent.value = finalDocument.value
+    currentContent.value = "resumen";
+  }
+}
+
 </script>
 
 <template>
@@ -147,6 +160,10 @@ function closeWhisperModal() {
         </div>
         <CopyButtons :original-transcript="originalTranscript" :original-notes="originalNotes"
           :main-content="mainContent" @copied="handleCopied" />
+        <button @click="toggleMainContent"
+          class="flex items-center focus:outline-hidden font-medium rounded-sm text-sm px-3 py-1.5 bg-slate-700 hover:bg-slate-600 focus:ring-gray-700 border-gray-700">
+          Cambiar a {{ currentContent === 'resumen' ? 'notas' : 'resumen' }}
+        </button>
       </div>
       <VideoInfo :video-title="videoTitle" :video-img="videoImg" />
       <div class="flex flex-col gap-2">
