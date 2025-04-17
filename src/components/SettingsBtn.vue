@@ -9,15 +9,15 @@ const openModal = () => {
   isModalOpen.value = true;
 };
 
-const availableModels = ref(["claude-3-haiku-20240307", "claude-3-5-sonnet-20240620", "gpt-4o-mini", "gpt-4o"]);
+const availableModels = ref(["claude-3-5-haiku-20241022", "claude-3-7-sonnet-20250219", "gpt-4.1-mini-2025-04-14", "gpt-4.1-nano-2025-04-14"]);
 
 const ragSearchTypes = ref(['similarity', 'mmr']);
 
 const config = reactive({
-  resumeModel: 'gpt-4o-mini',
+  resumeModel: 'gpt-4.1-nano-2025-04-14',
   resumeChunkSize: 10000,
-  condensaModel: 'gpt-4o-mini',
-  ragModel: 'gpt-4o-mini',
+  condensaModel: 'gpt-4.1-nano-2025-04-14',
+  ragModel: 'gpt-4.1-nano-2025-04-14',
   ragSearchType: 'similarity',
   ragSearchK: 5,
   ragChunkSize: 1000,
