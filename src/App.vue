@@ -139,7 +139,7 @@ function closeWhisperModal() {
 
 function toggleMainContent() {
   if (currentContent.value === "resumen") {
-    mainContent.value = originalNotes.value.join("")
+    mainContent.value = originalNotes.value.join("\n")
     currentContent.value = "notas";
   } else if (currentContent.value === "notas") {
     mainContent.value = finalDocument.value
