@@ -113,6 +113,9 @@ function handleBackendMessage(jsonMessage: any) {
   if (jsonMessage.action == "message" && jsonMessage.msgCode == "useWhisper") {
     feedbackType.value = "info"
     feedbackText.value = jsonMessage.msg
+    if (feedbackText.value.includes("transcripcion esta desactivada")) {
+      processBtnDisabled.value = false
+    }
     if (currentConfig.useWhisper == "si") {
       whisperModal.value = true
     }
@@ -139,7 +142,7 @@ function closeWhisperModal() {
 
 function toggleMainContent() {
   if (currentContent.value === "resumen") {
-    mainContent.value = originalNotes.value.join("\n")
+    mainContent.value = originalNotes.value.join("\n\n")
     currentContent.value = "notas";
   } else if (currentContent.value === "notas") {
     mainContent.value = finalDocument.value
