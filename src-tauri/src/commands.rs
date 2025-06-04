@@ -2,6 +2,7 @@ use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 use std::path::Path;
 use serde_json::{json, Value};
+use tauri::{AppHandle, Manager};
 
 #[tauri::command]
 pub fn write_config(json_data: String) -> Result<(), String> {
@@ -76,4 +77,17 @@ pub fn read_config() -> Result<Value, String> {
 #[tauri::command]
 pub fn get_env(name: &str) -> String {
     std::env::var(String::from(name)).unwrap_or_else(|_| String::from(""))
+}
+
+#[tauri::command]
+pub fn get_log_file_location(app_handle: AppHandle) -> Result<String, String> {
+    // Get the base application data directory
+    let app_data_base_dir = app_handle.path().app_data_dir()
+        .map_err(|e| format!("Failed to get app data directory: {}", e))?;
+
+    // Construct the full path to log.txt
+    let log_file_path = app_data_base_dir.join("log.txt");
+
+    // Return the path as a string
+    Ok(log_file_path.to_string_lossy().into_owned())
 }
