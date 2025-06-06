@@ -126,6 +126,11 @@ function handleBackendMessage(jsonMessage: any) {
   if (jsonMessage.action == "transcript") {
     originalTranscript.value = jsonMessage.transcript
   }
+  if (jsonMessage.msgCode == "cantGetTranscript") {
+      processBtnDisabled.value = false
+      feedbackText.value = jsonMessage.msg
+      feedbackType.value = "alert"
+  }
 }
 // Set up the message handler
 onMessage(handleBackendMessage)
