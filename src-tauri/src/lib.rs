@@ -82,7 +82,20 @@ pub fn run() {
                 };
                 // --- END: Simplified Log file path ---
 
-                let sidecar_command = handle.shell().sidecar("ai-brain").unwrap();
+                // Convert app_data_base_dir to a string to pass as an argument
+                let app_data_dir_str = match app_data_base_dir.to_str() {
+                    Some(s) => s.to_string(),
+                    None => {
+                        eprintln!("ERROR: Failed to convert app_data_base_dir to string.");
+                        // Handle this error appropriately, perhaps by using a default or panicking
+                        // For this example, we'll use an empty string, but this might not be ideal
+                        String::new()
+                    }
+                };
+
+                let sidecar_command = handle.shell().sidecar("ai-brain")
+                .unwrap()
+                .args(&[app_data_dir_str]); 
                 let (mut rx, _child) = sidecar_command.spawn().unwrap();
 
                 while let Some(event) = rx.recv().await {
